@@ -1,12 +1,13 @@
 const { app, BrowserWindow } = require("electron");
 require("electron-reload");
 const isDev = require("electron-is-dev");
+let win;
 
 function createWindow() {
   // Cree la fenetre du navigateur.
-  let win = new BrowserWindow({
-    width: 800,
-    height: 600,
+  win = new BrowserWindow({
+    width: 1440,
+    height: 800,
     webPreferences: {
       nodeIntegration: true
     }
@@ -16,8 +17,12 @@ function createWindow() {
   if (isDev) {
     win.loadURL("http://localhost:3000");
   } else {
-    win.loadFile("../react/public/index.html");
+    win.loadFile("../build/index.html");
   }
+
+  win.webContents.openDevTools();
+
+  require("./events");
 }
 
 app.on("ready", createWindow);

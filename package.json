@@ -1,20 +1,55 @@
 {
   "name": "syrrus",
-  "description": "",
-  "private": true,
   "version": "0.1.0",
+  "main": "process/main.js",
+  "license": "UNLICENSED",
   "scripts": {
-    "start": "yarn electron start",
-    "test": "yarn workspaces run test",
-    "electron": "yarn workspace syrrus-electron",
-    "react": "yarn workspace syrrus-react"
+    "start": "run-p start:*",
+    "start:electron": "NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
+    "start:react": "BROWSER=none react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test"
   },
-  "engines": {
-    "node": "^10.15.3",
-    "yarn": "^1.3.2"
+  "dependencies": {
+    "@material-ui/core": "^4.9.8",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.47",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "aws-sdk": "^2.648.0",
+    "electron-context-menu": "^0.16.0",
+    "electron-photon": "^1.1.6",
+    "electron-store": "^5.1.1",
+    "history": "^4.10.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "3.4.1",
+    "redux": "^4.0.5"
   },
-  "workspaces": [
-    "electron",
-    "react"
-  ]
+  "devDependencies": {
+    "electron": "^8.2.0",
+    "electron-is-dev": "^1.1.0",
+    "electron-reload": "^1.5.0",
+    "nodemon": "^2.0.2",
+    "npm-run-all": "^4.1.5",
+    "redux-devtools": "^3.5.0"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
 }
