@@ -55,7 +55,7 @@ export default function RecursiveTreeView() {
         );
         return job;
       });
-      dispatch(addJobs(jobsWithDetails));
+      dispatch(addJobs(jobsWithDetails, !!data.Marker));
       if (data.Marker) {
         ipcRenderer.send("GET_JOBS", { marker: data.Marker });
       }
@@ -96,11 +96,8 @@ export default function RecursiveTreeView() {
   const jobsToFetch = jobs.items.filter(
     job => job.Completed && !jobs.statusById[job.JobId]
   );
-  console.log(jobsToFetch);
   if (jobsToFetch.length) {
     dispatch(getJobDownloadStatus(jobsToFetch));
-
-    console.log(jobsToFetch);
     ipcRenderer.send("GET_DOWNLOAD_STATUS", jobsToFetch);
   }
 
@@ -120,18 +117,20 @@ export default function RecursiveTreeView() {
   return (
     <div className={classes.container}>
       <List dense={true}>
-        {jobs.items.map(job => (
-          <ListItem key={job.JobId}>
-            <ListItemIcon>
-              <FileCopyIcon className={classes.details} />
-            </ListItemIcon>
-            <ListItemText
-              className={classes.details}
-              primary={`${getStatus(job)} - ${job.details.Path}`}
-              secondary={""}
-            />
-          </ListItem>
-        ))}
+        {jobs.items
+          .sort((a, b) => b.details.Path - a.details.Path)
+          .map(job => (
+            <ListItem key={job.JobId}>
+              <ListItemIcon>
+                <FileCopyIcon className={classes.details} />
+              </ListItemIcon>
+              <ListItemText
+                className={classes.details}
+                primary={`${getStatus(job)} - ${job.details.Path}`}
+                secondary={""}
+              />
+            </ListItem>
+          ))}
       </List>
     </div>
   );

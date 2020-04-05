@@ -21,7 +21,7 @@ function jobs(state = INITIAL_STATE, action) {
       });
     case ADD_JOBS:
       return Object.assign({}, state, {
-        loading: false,
+        loading: action.finished,
         fetched: true,
         items: [...action.items, ...state.items]
       });

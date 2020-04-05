@@ -33,10 +33,11 @@ export function getJobs() {
   };
 }
 
-export function addJobs(items) {
+export function addJobs(items, finished) {
   return {
     type: ADD_JOBS,
-    items
+    items,
+    finished
   };
 }
 
