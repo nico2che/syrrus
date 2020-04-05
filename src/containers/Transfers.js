@@ -13,7 +13,12 @@ import {
 } from "@material-ui/core";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 
-import { getJobs, setJobs } from "../redux/actions";
+import {
+  getJobs,
+  addJobs,
+  getJobDownloadStatus,
+  setJobDownloadStatus
+} from "../redux/actions";
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -43,17 +48,26 @@ export default function RecursiveTreeView() {
   const { inventory, jobs } = useSelector(state => state);
 
   useEffect(() => {
-    ipcRenderer.on("GET_JOBS_RESPONSE", (_, jobs) => {
-      const jobsWithDetails = jobs.map(job => {
+    ipcRenderer.on("GET_JOBS_RESPONSE", (_, data) => {
+      const jobsWithDetails = data.JobList.map(job => {
         job.details = inventory.items.ArchiveList.find(
           archive => archive.ArchiveId === job.ArchiveId
         );
         return job;
       });
-      dispatch(setJobs(jobsWithDetails));
+      dispatch(addJobs(jobsWithDetails));
+      if (data.Marker) {
+        ipcRenderer.send("GET_JOBS", { marker: data.Marker });
+      }
+    });
+
+    ipcRenderer.on("GET_DOWNLOAD_STATUS_RESPONSE", (_, response) => {
+      const { jobId, status } = response;
+      dispatch(setJobDownloadStatus(jobId, status));
     });
     return () => {
       ipcRenderer.removeAllListeners("GET_JOBS_RESPONSE");
+      ipcRenderer.removeAllListeners("GET_DOWNLOAD_STATUS_RESPONSE");
     };
   }, []);
 
@@ -69,7 +83,7 @@ export default function RecursiveTreeView() {
 
   if (!jobs.fetched) {
     dispatch(getJobs());
-    ipcRenderer.send("GET_JOBS");
+    ipcRenderer.send("GET_JOBS", {});
     return (
       <div className={classes.container}>
         <div className={classes.loadContainer}>
@@ -79,11 +93,29 @@ export default function RecursiveTreeView() {
     );
   }
 
-  console.log(jobs);
+  const jobsToFetch = jobs.items.filter(
+    job => job.Completed && !jobs.statusById[job.JobId]
+  );
+  console.log(jobsToFetch);
+  if (jobsToFetch.length) {
+    dispatch(getJobDownloadStatus(jobsToFetch));
 
-  // jobs.items
-  //   .filter(item => !item.downloadStatus)
-  //   .map(item => dispatch(getJobDownloadStatus(item.JobId)));
+    console.log(jobsToFetch);
+    ipcRenderer.send("GET_DOWNLOAD_STATUS", jobsToFetch);
+  }
+
+  const getStatus = job => {
+    if (!job.Completed) {
+      return `${job.StatusCode}`;
+    }
+    const status = {
+      FETCHING: "Retrieving download status...",
+      WAIT_FOR_DOWNLOAD: "Wait for download...",
+      DOWNLOADING: "Downloading...",
+      DOWNLOADED: "Downloaded ✓"
+    };
+    return `${job.StatusCode} - ${status[jobs.statusById[job.JobId]]}`;
+  };
 
   return (
     <div className={classes.container}>
@@ -95,8 +127,8 @@ export default function RecursiveTreeView() {
             </ListItemIcon>
             <ListItemText
               className={classes.details}
-              primary={job.details.Path}
-              secondary={job.StatusCode}
+              primary={`${getStatus(job)} - ${job.details.Path}`}
+              secondary={""}
             />
           </ListItem>
         ))}

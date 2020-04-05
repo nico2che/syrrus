@@ -110,11 +110,34 @@ function Files() {
     );
   }
 
+  const paths = {
+    id: "root",
+    name: "chevigne",
+    children: []
+  };
+  inventory.items.ArchiveList.map(archive => ({
+    id: archive.ArchiveId,
+    name: FGDescription(archive.ArchiveDescription),
+    size: archive.Size
+  })).map(line => transformPaths(paths, line.name, line.id));
+
+  const checkNodeAndChildren = (folder, checked) => {
+    folder.checked = checked;
+    if (folder.children) {
+      for (const children of folder.children) {
+        checkNodeAndChildren(children, checked);
+      }
+    }
+  };
+
   const checkItem = node => {
     return e => {
       e.stopPropagation();
-      node.checked = e.target.checked;
-      setSelectedFiles(getSelectedFiles(inventory.items.children));
+      checkNodeAndChildren(node, e.target.checked);
+      console.log(paths);
+      const selected = getSelectedFiles(paths);
+      console.log(selected);
+      setSelectedFiles(selected);
     };
   };
 
@@ -126,7 +149,7 @@ function Files() {
         nodeId={nodes.id}
         label={
           <div className={classes.labelRoot}>
-            <Checkbox onClick={checkItem(nodes)} />
+            <Checkbox onClick={checkItem(nodes)} checked={nodes.checked} />
             <span className={classes.labelText}>{nodes.name}</span>
             {nodes.children && (
               <Typography variant="caption" color="inherit">
@@ -143,28 +166,20 @@ function Files() {
     );
 
   const getSelectedFiles = folder => {
+    if (!folder.children) {
+      return folder.checked ? [folder] : [];
+    }
     const files = [];
-    for (const file of folder) {
-      if (file.checked && file.type === 2) {
-        files.push(file);
+    for (const children of folder.children) {
+      if (children.checked && children.type === 2) {
+        files.push(children);
       }
-      if (file.children) {
-        [].push.apply(files, getSelectedFiles(file.children));
+      if (children.children) {
+        [].push.apply(files, getSelectedFiles(children));
       }
     }
     return files;
   };
-
-  const paths = {
-    id: "root",
-    name: "chevigne",
-    children: []
-  };
-  inventory.items.ArchiveList.map(archive => ({
-    id: archive.ArchiveId,
-    name: FGDescription(archive.ArchiveDescription),
-    size: archive.Size
-  })).map(line => transformPaths(paths, line.name, line.id));
 
   return (
     <div className={classes.container}>

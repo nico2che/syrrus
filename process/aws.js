@@ -4,23 +4,20 @@ const glacier = new AWS.Glacier({
   region: "eu-west-1"
 });
 
-function getJobs(filter = {}) {
-  const { action } = filter;
+function getJobs(options = {}) {
+  const { marker } = options;
   return new Promise((res, rej) => {
     glacier.listJobs(
       {
         accountId: "-",
-        vaultName: "chevigne"
+        vaultName: "chevigne",
+        ...(marker && { marker })
       },
       function(err, data) {
         if (err) {
           return rej(err);
         }
-        if (!action) {
-          return res(data.JobList);
-        }
-        const jobs = data.JobList.filter(job => job.Action === action);
-        return res(jobs);
+        res(data);
       }
     );
   });

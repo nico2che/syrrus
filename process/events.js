@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const { ipcMain } = require("electron");
 const Store = require("electron-store");
 
@@ -25,6 +27,40 @@ listen("GET_INVENTORY", getInventory);
 listen("GET_JOBS", getJobs);
 listen("DOWNLOAD_FILES", downloadFiles);
 
+ipcMain.on("GET_DOWNLOAD_STATUS", getDownloadStatus);
+async function getDownloadStatus(event, jobsToDownload) {
+  const toDownloads = [];
+  for (const job of jobsToDownload) {
+    if (fs.existsSync(`/Users/nicolas/Syrrus/${job.details.Path}`)) {
+      event.sender.send("GET_DOWNLOAD_STATUS_RESPONSE", {
+        jobId: job.JobId,
+        status: "DOWNLOADED"
+      });
+    } else {
+      toDownloads.push(job);
+      const response = {
+        jobId: job.JobId,
+        status: "WAIT_FOR_DOWNLOAD"
+      };
+      event.sender.send("GET_DOWNLOAD_STATUS_RESPONSE", response);
+    }
+  }
+  for (const job of toDownloads) {
+    event.sender.send("GET_DOWNLOAD_STATUS_RESPONSE", {
+      jobId: job.JobId,
+      status: "DOWNLOADING"
+    });
+    const file = await getJobOutput(job.JobId);
+    const pathFile = `/Users/nicolas/Syrrus/${job.details.Path}`;
+    fs.mkdirSync(path.dirname(pathFile), { recursive: true });
+    fs.writeFileSync(pathFile, file.body, { encoding: "binary" });
+    event.sender.send("GET_DOWNLOAD_STATUS_RESPONSE", {
+      jobId: job.JobId,
+      status: "DOWNLOADED"
+    });
+  }
+}
+
 function formatInventory(inventory) {
   inventory.ArchiveList.map(
     item => (item.Path = FGDescription(item.ArchiveDescription))
@@ -40,7 +76,9 @@ async function getInventory() {
       items: formatInventory(items)
     };
   }
-  const jobs = await getJobs({ action: "InventoryRetrieval" });
+  const jobs = await getJobs().then(data =>
+    data.JobList.filter(item => item.Action === "InventoryRetrieval")
+  );
   if (!jobs.length) {
     const job = await createJob("inventory-retrieval");
     return {
