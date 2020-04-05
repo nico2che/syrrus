@@ -1,14 +1,18 @@
 {
   "name": "syrrus",
+  "description": "AWS Glacier manager",
   "version": "0.1.0",
-  "main": "process/main.js",
+  "author": "Nicolas de Chevigné",
+  "main": "./process/main.js",
   "license": "UNLICENSED",
   "scripts": {
     "start": "run-p start:*",
     "start:electron": "NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
     "start:react": "BROWSER=none react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "dist": "electron-builder build --publish never"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.8",
@@ -31,6 +35,7 @@
   },
   "devDependencies": {
     "electron": "^8.2.0",
+    "electron-builder": "^22.4.1",
     "electron-is-dev": "^1.1.0",
     "electron-reload": "^1.5.0",
     "nodemon": "^2.0.2",
@@ -39,6 +44,53 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "build": {
+    "productName": "Syrrus",
+    "appId": "fr.chevigne.syrrus",
+    "extends": null,
+    "files": [
+      "./build/**/*",
+      "./process/"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "msi"
+      ]
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "rpm",
+        "AppImage"
+      ],
+      "category": "Utilities"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "nico2che",
+      "repo": "syrrus",
+      "private": false
+    }
   },
   "browserslist": {
     "production": [
