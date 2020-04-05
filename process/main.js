@@ -1,7 +1,10 @@
 const { app, BrowserWindow } = require("electron");
-require("electron-reload");
 const isDev = require("electron-is-dev");
 let win;
+
+if (isDev) {
+  require("electron-reload");
+}
 
 function createWindow() {
   // Cree la fenetre du navigateur.
