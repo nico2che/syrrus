@@ -1,5 +1,7 @@
 ## Syrrus - AWS Glacier manager
 
+![Build/release](https://github.com/nico2che/syrrus/workflows/Build/release/badge.svg?branch=master)
+
 Syrrus is a electron-based interface to manage files into your AWS Glacier
 
 Currently in alpha-version
