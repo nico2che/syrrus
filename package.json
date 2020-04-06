@@ -1,7 +1,7 @@
 {
   "name": "syrrus",
   "description": "AWS Glacier manager",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "author": "Nicolas de Chevigné <nicolas@chevigne.fr>",
   "main": "./process/main.js",
   "license": "UNLICENSED",
@@ -12,7 +12,6 @@
     "test": "react-scripts test",
     "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
-    "postversion": "git push origin v$npm_package_version",
     "dist": "electron-builder build --publish never"
   },
   "dependencies": {
