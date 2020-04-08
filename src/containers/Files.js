@@ -14,51 +14,51 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   container: {
-    height: "calc(100vh - 64px)"
+    height: "calc(100vh - 64px)",
   },
   loadContainer: {
     height: "100%",
     width: "100%",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   loadDetails: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   rootTree: {
-    padding: "30px"
+    padding: "30px",
   },
   labelRoot: {
     display: "flex",
     alignItems: "center",
-    padding: theme.spacing(0.5, 0)
+    padding: theme.spacing(0.5, 0),
   },
   labelText: {
     fontWeight: "inherit",
-    flexGrow: 1
+    flexGrow: 1,
   },
   viewType: {
     color: "white",
-    borderColor: "white"
+    borderColor: "white",
   },
   title: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   fab: {
     margin: theme.spacing(1),
     position: "fixed",
     bottom: "10px",
-    right: "10px"
+    right: "10px",
   },
   fabIcon: {
-    marginRight: theme.spacing(1)
-  }
+    marginRight: theme.spacing(1),
+  },
 }));
 
 function Files() {
@@ -66,7 +66,7 @@ function Files() {
   const classes = useStyles();
 
   const dispatch = useDispatch();
-  const inventory = useSelector(state => state.inventory);
+  const inventory = useSelector((state) => state.inventory);
 
   useEffect(() => {
     ipcRenderer.on("GET_INVENTORY_RESPONSE", (_, response) => {
@@ -80,7 +80,7 @@ function Files() {
       ipcRenderer.removeAllListeners("GET_INVENTORY_RESPONSE");
       ipcRenderer.removeAllListeners("DOWNLOAD_FILES_RESPONSE");
     };
-  }, []);
+  }, [dispatch]);
 
   if (inventory.loading) {
     return (
@@ -113,13 +113,13 @@ function Files() {
   const paths = {
     id: "root",
     name: "chevigne",
-    children: []
+    children: [],
   };
-  inventory.items.ArchiveList.map(archive => ({
+  inventory.items.ArchiveList.map((archive) => ({
     id: archive.ArchiveId,
     name: FGDescription(archive.ArchiveDescription),
-    size: archive.Size
-  })).map(line => transformPaths(paths, line.name, line.id));
+    size: archive.Size,
+  })).map((line) => transformPaths(paths, line.name, line.id));
 
   const checkNodeAndChildren = (folder, checked) => {
     folder.checked = checked;
@@ -130,8 +130,8 @@ function Files() {
     }
   };
 
-  const checkItem = node => {
-    return e => {
+  const checkItem = (node) => {
+    return (e) => {
       e.stopPropagation();
       checkNodeAndChildren(node, e.target.checked);
       console.log(paths);
@@ -141,7 +141,7 @@ function Files() {
     };
   };
 
-  const renderTree = nodes =>
+  const renderTree = (nodes) =>
     nodes.id && (
       <TreeItem
         className="file-line"
@@ -160,12 +160,12 @@ function Files() {
         }
       >
         {Array.isArray(nodes.children)
-          ? nodes.children.map(node => renderTree(node))
+          ? nodes.children.map((node) => renderTree(node))
           : null}
       </TreeItem>
     );
 
-  const getSelectedFiles = folder => {
+  const getSelectedFiles = (folder) => {
     if (!folder.children) {
       return folder.checked ? [folder] : [];
     }
