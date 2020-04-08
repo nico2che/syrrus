@@ -9,21 +9,23 @@ if (isDev) {
 function createWindow() {
   // Cree la fenetre du navigateur.
   win = new BrowserWindow({
-    width: 1440,
-    height: 800,
+    width: 1000,
+    height: 700,
     webPreferences: {
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   });
 
   // and load the index.html of the app.
   if (isDev) {
     win.loadURL("http://localhost:3000");
   } else {
-    win.loadFile("../build/index.html");
+    win.loadFile("build/index.html");
   }
 
-  win.webContents.openDevTools();
+  if (isDev) {
+    win.webContents.openDevTools();
+  }
 
   require("./events");
 }
