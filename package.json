@@ -12,7 +12,7 @@
     "test": "react-scripts test",
     "postinstall": "electron-builder install-app-deps",
     "build": "run-s build:*",
-    "build:react": "PUBLIC_URL=. react-scripts build",
+    "build:react": "cross-env PUBLIC_URL=. react-scripts build",
     "build:app": "electron-builder build"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "redux": "^4.0.5"
   },
   "devDependencies": {
+    "cross-env": "^7.0.2",
     "electron": "^8.2.0",
     "electron-builder": "^22.4.1",
     "electron-is-dev": "^1.1.0",
