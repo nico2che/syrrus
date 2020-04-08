@@ -1,7 +1,7 @@
 {
   "name": "syrrus",
   "description": "AWS Glacier manager",
-  "version": "0.0.3",
+  "version": "0.0.2",
   "author": "Nicolas de Chevigné <nicolas@chevigne.fr>",
   "main": "./process/main.js",
   "license": "UNLICENSED",
@@ -25,7 +25,6 @@
     "@testing-library/user-event": "^7.1.2",
     "aws-sdk": "^2.648.0",
     "electron-context-menu": "^0.16.0",
-    "electron-photon": "^1.1.6",
     "electron-store": "^5.1.1",
     "history": "^4.10.1",
     "react": "^16.13.1",
