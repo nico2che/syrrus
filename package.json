@@ -10,10 +10,11 @@
     "start:electron": "NODE_ENV=dev nodemon --exec \"\"electron .\"\"",
     "start:react": "BROWSER=none react-scripts start",
     "test": "react-scripts test",
-    "pack": "electron-builder --dir",
     "postinstall": "electron-builder install-app-deps",
     "postversion": "git push origin v$npm_package_version",
-    "dist": "electron-builder build --publish never"
+    "build": "run-s build:*",
+    "build:react": "PUBLIC_URL=. react-scripts build",
+    "build:app": "electron-builder build"
   },
   "dependencies": {
     "@material-ui/core": "^4.9.8",
