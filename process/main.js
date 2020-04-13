@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron");
+const windowStateKeeper = require("electron-window-state");
 const isDev = require("electron-is-dev");
 let win;
 
@@ -8,13 +9,22 @@ if (isDev) {
 
 function createWindow() {
   // Cree la fenetre du navigateur.
+  const mainWindowState = windowStateKeeper({
+    defaultWidth: 1000,
+    defaultHeight: 800,
+  });
+
   win = new BrowserWindow({
-    width: 1000,
-    height: 700,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
     webPreferences: {
       nodeIntegration: true,
     },
   });
+
+  mainWindowState.manage(win);
 
   // and load the index.html of the app.
   if (isDev) {
