@@ -41,7 +41,7 @@ const transformPaths = (obj, path, line) => {
 };
 
 const getPath = (object, pathArray) => {
-  const path = pathArray.shift();
+  const [path] = pathArray.slice(0, 1);
   if (!path) {
     return object;
   }
@@ -50,7 +50,7 @@ const getPath = (object, pathArray) => {
       if (!path.length) {
         return children;
       }
-      return getPath(children, pathArray);
+      return getPath(children, pathArray.slice(1));
     }
   }
 };

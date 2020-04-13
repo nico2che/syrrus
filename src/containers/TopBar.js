@@ -6,8 +6,12 @@ import {
   ButtonGroup,
   Button,
   makeStyles,
+  Link,
 } from "@material-ui/core";
+import NavigateNextIcon from "@material-ui/icons/NavigateNext";
 import { useHistory } from "react-router-dom";
+import { connect, useSelector, useDispatch } from "react-redux";
+import { setCurrentPath } from "../redux/actions";
 
 const useStyles = makeStyles(() => ({
   viewType: {
@@ -17,11 +21,27 @@ const useStyles = makeStyles(() => ({
   title: {
     flexGrow: 1,
   },
+  pointer: {
+    cursor: "pointer",
+  },
+  homeIcon: {
+    fontSize: 22,
+    marginTop: 5,
+  },
+  path: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 }));
 
 function TopBar() {
   const classes = useStyles();
   const history = useHistory();
+
+  const dispatch = useDispatch();
+  const currentPath = useSelector((state) => state.inventory.currentPath);
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -43,8 +63,47 @@ function TopBar() {
           </Button>
         </ButtonGroup>
       </Toolbar>
+      <Toolbar variant="dense">
+        <Link
+          color="inherit"
+          className={classes.pointer}
+          onClick={() => history.push("/accounts")}
+        >
+          Home
+        </Link>
+        <NavigateNextIcon />
+        <Link
+          color="inherit"
+          className={classes.pointer}
+          onClick={() => history.push("/vaults")}
+        >
+          test account
+        </Link>
+        <NavigateNextIcon />
+        <Link
+          color="inherit"
+          className={classes.pointer}
+          onClick={() => dispatch(setCurrentPath([]))}
+        >
+          chevigne
+        </Link>
+        {currentPath.map((p, i) => (
+          <div key={i} className={classes.path}>
+            <NavigateNextIcon />
+            <Link
+              color="inherit"
+              className={classes.pointer}
+              onClick={() =>
+                dispatch(setCurrentPath(currentPath.slice(0, i + 1)))
+              }
+            >
+              {p}
+            </Link>
+          </div>
+        ))}
+      </Toolbar>
     </AppBar>
   );
 }
 
-export default TopBar;
+export default connect()(TopBar);

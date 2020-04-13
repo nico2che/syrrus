@@ -25,9 +25,10 @@ import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
 import { FixedSizeList } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 
+let clicked;
 const useStyles = makeStyles((theme) => ({
   container: {
-    height: "calc(100vh - 64px)",
+    height: "calc(100vh - 112px)",
   },
   loadContainer: {
     height: "100%",
@@ -41,6 +42,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
+  },
+
+  toolbar: {
+    borderBottom: "1px solid rgba(224, 224, 224, 1)",
   },
 
   table: {
@@ -98,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function Files() {
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selected, setSelected] = useState([]);
   const classes = useStyles();
 
   const dispatch = useDispatch();
@@ -157,43 +162,47 @@ function Files() {
   }
 
   const paths = inventory.paths;
-  const currentDirectory = getPath(paths, [...inventory.currentPath]);
+  const currentDirectory = getPath(paths, inventory.currentPath);
+  const rows = currentDirectory.children;
+
+  const handleClickRow = (name) => {
+    setSelected([name]);
+    if (clicked) {
+      // dbl clicked
+      dispatch(setCurrentPath([...inventory.currentPath, name]));
+      clicked = null;
+      return;
+    }
+    clicked = setTimeout(() => {
+      clicked = null;
+    }, 200);
+  };
+
+  function TableHeader(props) {
+    return (
+      <TableHead component="div">
+        <TableRow component="div">
+          <TableCell component="div">Name</TableCell>
+        </TableRow>
+      </TableHead>
+    );
+  }
 
   function renderRow(props) {
     const { index, style } = props;
-    if (index === 0) {
-      return (
-        <TableRow
-          className={classes.row}
-          component="div"
-          hover
-          role="checkbox"
-          tabIndex={-1}
-          key={index}
-          onClick={() =>
-            dispatch(setCurrentPath(inventory.currentPath.slice(0, -1)))
-          }
-          style={style}
-        >
-          <TableCell className={classes.cell} component="div" variant="body">
-            ..
-          </TableCell>
-        </TableRow>
-      );
-    }
-    const name = currentDirectory.children[index - 1].name;
+    const name = rows[index].name;
+    const isItemSelected = isSelected(name);
     return (
       <TableRow
+        key={index}
+        style={style}
         className={classes.row}
         component="div"
         hover
         role="checkbox"
         tabIndex={-1}
-        key={index}
-        onClick={() =>
-          dispatch(setCurrentPath([...inventory.currentPath, name]))
-        }
-        style={style}
+        onClick={() => handleClickRow(name)}
+        selected={isItemSelected}
       >
         <TableCell className={classes.cell} component="div" variant="body">
           {name}
@@ -201,6 +210,8 @@ function Files() {
       </TableRow>
     );
   }
+
+  const isSelected = (name) => selected.indexOf(name) !== -1;
 
   return (
     <div className={classes.container}>
@@ -210,21 +221,15 @@ function Files() {
         size="small"
         className={classes.table}
       >
-        <TableHead component="div">
-          <TableRow component="div">
-            <TableCell component="div">Name</TableCell>
-          </TableRow>
-        </TableHead>
+        <TableHeader />
         <TableBody component="div" className={classes.tbody}>
           <AutoSizer>
             {({ height, width }) => (
               <FixedSizeList
                 height={height}
                 width={width}
-                itemCount={currentDirectory.children.length + 1}
+                itemCount={rows.length}
                 itemSize={37}
-                // itemKey={(index, data) => data.items[index].id}
-                // itemData={currentDirectory.children}
               >
                 {renderRow}
               </FixedSizeList>
@@ -232,15 +237,15 @@ function Files() {
           </AutoSizer>
         </TableBody>
       </Table>
-      {!!selectedFiles.length && (
+      {!!selected.length && (
         <Fab
           className={classes.fab}
           variant="extended"
           color="secondary"
-          onClick={() => ipcRenderer.send("DOWNLOAD_FILES", selectedFiles)}
+          onClick={() => ipcRenderer.send("DOWNLOAD_FILES", selected)}
         >
           <CloudDownloadIcon className={classes.fabIcon} />
-          {selectedFiles.length}
+          {selected.length}
         </Fab>
       )}
     </div>
