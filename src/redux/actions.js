@@ -1,6 +1,7 @@
 export const GET_INVENTORY = "GET_INVENTORY";
 export const SET_INVENTORY = "SET_INVENTORY";
 export const START_INVENTORY = "START_INVENTORY";
+export const SET_CURRENT_PATH = "SET_CURRENT_PATH";
 
 export const GET_JOBS = "GET_JOBS";
 export const ADD_JOBS = "ADD_JOBS";
@@ -9,27 +10,35 @@ export const SET_DOWNLOAD_STATUS = "SET_DOWNLOAD_STATUS";
 
 export function getInventory() {
   return {
-    type: GET_INVENTORY
+    type: GET_INVENTORY,
   };
 }
 
-export function setInventory(items) {
+export function setInventory(items, paths) {
   return {
     type: SET_INVENTORY,
-    items
+    items,
+    paths,
   };
 }
 
 export function startInventory(startDate) {
   return {
     type: START_INVENTORY,
-    startDate
+    startDate,
+  };
+}
+
+export function setCurrentPath(currentPath) {
+  return {
+    type: SET_CURRENT_PATH,
+    currentPath,
   };
 }
 
 export function getJobs() {
   return {
-    type: GET_JOBS
+    type: GET_JOBS,
   };
 }
 
@@ -37,14 +46,14 @@ export function addJobs(items, finished) {
   return {
     type: ADD_JOBS,
     items,
-    finished
+    finished,
   };
 }
 
 export function getJobDownloadStatus(jobs) {
   return {
     type: GET_DOWNLOAD_STATUS,
-    jobs
+    jobs,
   };
 }
 
@@ -52,6 +61,6 @@ export function setJobDownloadStatus(jobId, status) {
   return {
     type: SET_DOWNLOAD_STATUS,
     jobId,
-    status
+    status,
   };
 }

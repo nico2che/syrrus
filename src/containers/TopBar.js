@@ -5,18 +5,18 @@ import {
   Typography,
   ButtonGroup,
   Button,
-  makeStyles
+  makeStyles,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles(() => ({
   viewType: {
     color: "white",
-    borderColor: "white"
+    borderColor: "white",
   },
   title: {
-    flexGrow: 1
-  }
+    flexGrow: 1,
+  },
 }));
 
 function TopBar() {
@@ -26,7 +26,7 @@ function TopBar() {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" className={classes.title}>
-          Photos
+          Syrrus
         </Typography>
         <ButtonGroup>
           <Button

@@ -1,6 +1,6 @@
 const TYPE = {
   FOLDER: 1,
-  FILE: 2
+  FILE: 2,
 };
 
 function FGDescription(encoded) {
@@ -20,13 +20,13 @@ const transformPaths = (obj, path, line) => {
   let current = obj;
   while (folders.length) {
     const name = folders.shift();
-    let children = current.children.find(c => c.name === name);
+    let children = current.children.find((c) => c.name === name);
     if (!children) {
       children = {
         id: name,
         type: TYPE.FOLDER,
         name,
-        children: []
+        children: [],
       };
       current.children.push(children);
     }
@@ -35,9 +35,24 @@ const transformPaths = (obj, path, line) => {
   current.children.push({
     id: line,
     type: TYPE.FILE,
-    name: file
+    name: file,
   });
   return obj;
 };
 
-export { transformPaths, FGDescription };
+const getPath = (object, pathArray) => {
+  const path = pathArray.shift();
+  if (!path) {
+    return object;
+  }
+  for (const children of object.children) {
+    if (children.name === path) {
+      if (!path.length) {
+        return children;
+      }
+      return getPath(children, pathArray);
+    }
+  }
+};
+
+export { transformPaths, FGDescription, getPath };

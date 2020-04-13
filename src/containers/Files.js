@@ -3,16 +3,27 @@ import { connect, useDispatch, useSelector } from "react-redux";
 const { ipcRenderer } = window.require("electron");
 /* eslint-disable import/first */
 
-import { getInventory, setInventory, startInventory } from "../redux/actions";
-import { transformPaths, FGDescription } from "../utils";
+import {
+  getInventory,
+  setInventory,
+  startInventory,
+  setCurrentPath,
+} from "../redux/actions";
+import { transformPaths, FGDescription, getPath } from "../utils";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { CircularProgress, Fab, Typography, Checkbox } from "@material-ui/core";
-import TreeView from "@material-ui/lab/TreeView";
-import TreeItem from "@material-ui/lab/TreeItem";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import {
+  CircularProgress,
+  Fab,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@material-ui/core";
 import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import { FixedSizeList } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -31,6 +42,31 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     flexDirection: "column",
   },
+
+  table: {
+    width: "100%",
+    height: "100%",
+  },
+  tbody: {
+    width: "100%",
+  },
+  row: {
+    display: "flex",
+    flexDirection: "row",
+    flexWrap: "nowrap",
+    alignItems: "center",
+    boxSizing: "border-box",
+    minWidth: "100%",
+    width: "100%",
+  },
+  cell: {
+    display: "block",
+    flexGrow: 0,
+    flexShrink: 0,
+    width: "100%",
+    height: 36,
+  },
+
   rootTree: {
     padding: "30px",
   },
@@ -71,7 +107,17 @@ function Files() {
   useEffect(() => {
     ipcRenderer.on("GET_INVENTORY_RESPONSE", (_, response) => {
       if (response.completed) {
-        return dispatch(setInventory(response.items));
+        const paths = {
+          id: "root",
+          name: "root",
+          children: [],
+        };
+        response.items.ArchiveList.map((archive) => ({
+          id: archive.ArchiveId,
+          name: FGDescription(archive.ArchiveDescription),
+          size: archive.Size,
+        })).map((line) => transformPaths(paths, line.name, line.id));
+        return dispatch(setInventory(response.items, paths));
       }
       dispatch(startInventory(response.startDate));
     });
@@ -110,87 +156,82 @@ function Files() {
     );
   }
 
-  const paths = {
-    id: "root",
-    name: "chevigne",
-    children: [],
-  };
-  inventory.items.ArchiveList.map((archive) => ({
-    id: archive.ArchiveId,
-    name: FGDescription(archive.ArchiveDescription),
-    size: archive.Size,
-  })).map((line) => transformPaths(paths, line.name, line.id));
+  const paths = inventory.paths;
+  const currentDirectory = getPath(paths, [...inventory.currentPath]);
 
-  const checkNodeAndChildren = (folder, checked) => {
-    folder.checked = checked;
-    if (folder.children) {
-      for (const children of folder.children) {
-        checkNodeAndChildren(children, checked);
-      }
+  function renderRow(props) {
+    const { index, style } = props;
+    if (index === 0) {
+      return (
+        <TableRow
+          className={classes.row}
+          component="div"
+          hover
+          role="checkbox"
+          tabIndex={-1}
+          key={index}
+          onClick={() =>
+            dispatch(setCurrentPath(inventory.currentPath.slice(0, -1)))
+          }
+          style={style}
+        >
+          <TableCell className={classes.cell} component="div" variant="body">
+            ..
+          </TableCell>
+        </TableRow>
+      );
     }
-  };
-
-  const checkItem = (node) => {
-    return (e) => {
-      e.stopPropagation();
-      checkNodeAndChildren(node, e.target.checked);
-      console.log(paths);
-      const selected = getSelectedFiles(paths);
-      console.log(selected);
-      setSelectedFiles(selected);
-    };
-  };
-
-  const renderTree = (nodes) =>
-    nodes.id && (
-      <TreeItem
-        className="file-line"
-        key={nodes.id}
-        nodeId={nodes.id}
-        label={
-          <div className={classes.labelRoot}>
-            <Checkbox onClick={checkItem(nodes)} checked={nodes.checked} />
-            <span className={classes.labelText}>{nodes.name}</span>
-            {nodes.children && (
-              <Typography variant="caption" color="inherit">
-                {nodes.children.length}
-              </Typography>
-            )}
-          </div>
+    const name = currentDirectory.children[index - 1].name;
+    return (
+      <TableRow
+        className={classes.row}
+        component="div"
+        hover
+        role="checkbox"
+        tabIndex={-1}
+        key={index}
+        onClick={() =>
+          dispatch(setCurrentPath([...inventory.currentPath, name]))
         }
+        style={style}
       >
-        {Array.isArray(nodes.children)
-          ? nodes.children.map((node) => renderTree(node))
-          : null}
-      </TreeItem>
+        <TableCell className={classes.cell} component="div" variant="body">
+          {name}
+        </TableCell>
+      </TableRow>
     );
-
-  const getSelectedFiles = (folder) => {
-    if (!folder.children) {
-      return folder.checked ? [folder] : [];
-    }
-    const files = [];
-    for (const children of folder.children) {
-      if (children.checked && children.type === 2) {
-        files.push(children);
-      }
-      if (children.children) {
-        [].push.apply(files, getSelectedFiles(children));
-      }
-    }
-    return files;
-  };
+  }
 
   return (
     <div className={classes.container}>
-      <TreeView
-        className={classes.rootTree}
-        defaultCollapseIcon={<ExpandMoreIcon />}
-        defaultExpanded={["root"]}
-        defaultExpandIcon={<ChevronRightIcon />}
+      <Table
+        component="div"
+        stickyHeader
+        size="small"
+        className={classes.table}
       >
-        {renderTree(paths)}
-      </TreeView>
+        <TableHead component="div">
+          <TableRow component="div">
+            <TableCell component="div">Name</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody component="div" className={classes.tbody}>
+          <AutoSizer>
+            {({ height, width }) => (
+              <FixedSizeList
+                height={height}
+                width={width}
+                itemCount={currentDirectory.children.length + 1}
+                itemSize={37}
+                // itemKey={(index, data) => data.items[index].id}
+                // itemData={currentDirectory.children}
+              >
+                {renderRow}
+              </FixedSizeList>
+            )}
+          </AutoSizer>
+        </TableBody>
+      </Table>
       {!!selectedFiles.length && (
         <Fab
           className={classes.fab}
