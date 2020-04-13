@@ -18,7 +18,36 @@ import TopBar from "./containers/TopBar";
 
 import reducers from "./redux/reducers";
 
-const theme = createMuiTheme();
+const theme = createMuiTheme({
+  palette: {
+    common: { black: "#000", white: "#fff" },
+    background: { paper: "#fff", default: "#fafafa" },
+    primary: {
+      light: "#7986cb",
+      main: "#3f51b5",
+      dark: "#303f9f",
+      contrastText: "#fff",
+    },
+    secondary: {
+      light: "rgba(74, 144, 226, 0.55)",
+      main: "rgba(74, 144, 226, 1)",
+      dark: "rgba(43, 71, 168, 1)",
+      contrastText: "#fff",
+    },
+    error: {
+      light: "#e57373",
+      main: "#f44336",
+      dark: "#d32f2f",
+      contrastText: "#fff",
+    },
+    text: {
+      primary: "rgba(0, 0, 0, 0.87)",
+      secondary: "rgba(0, 0, 0, 0.54)",
+      disabled: "rgba(0, 0, 0, 0.38)",
+      hint: "rgba(0, 0, 0, 0.38)",
+    },
+  },
+});
 
 const logger = createLogger();
 const history = createBrowserHistory();
